@@ -3,6 +3,8 @@ require 'openssl'
 require 'optparse'
 
 
+ENV['TZ'] = 'GMT'
+
 module Akamai
     class AuthTokenError < Exception
         """Base-class for all exceptions raised by AuthToken Class"""
