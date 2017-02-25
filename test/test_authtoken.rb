@@ -85,12 +85,30 @@ class TestAuthToken < Test::Unit::TestCase
         assert_equal(expacted, res.code)
     end
 
-    def _test_case_set(query_path, cookie_path, escape_early, isUrl)
+    def _headerAssertEqual(path, expacted, query: '', escape_early: false, transition: false,
+                           payload: nil, session_id: nil, isUrl: true)
+        _token_setting('h', escape_early, transition)
+        if isUrl
+            token = @hat.generateToken(url: path, payload: nil, session_id: nil)
+        else
+            token = @hat.generateToken(acl: path, payload: nil, session_id: nil)
+        end
+
+        uri = URI("http://#{AT_HOSTNAME}#{path}")
+        http = Net::HTTP.new(uri.host, uri.port)
+        req = Net::HTTP::Get.new(uri)
+        req[@hat.token_name] = token
+        res = http.request(req)
+        assert_equal(expacted, res.code)
+    end
+
+    def _test_case_set(query_path, cookie_path, header_path, escape_early, isUrl)
         _queryAssertEqual(query_path, "404", escape_early: escape_early, isUrl: isUrl)
         _cookieAssertEqual(cookie_path, "404", escape_early: escape_early, isUrl: isUrl)
+        _headerAssertEqual(header_path, "404", escape_early: escape_early, isUrl: isUrl)
     end
 
     def test_url_escape_on__ignoreQuery_yes
-        _test_case_set("/q_escape_ignore", "/c_escape_ignore", true, true)
+        _test_case_set("/q_escape_ignore", "/c_escape_ignore", "/h_escape_ignore", true, true)
     end
 end
