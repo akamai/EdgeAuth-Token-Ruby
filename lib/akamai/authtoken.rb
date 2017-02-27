@@ -11,13 +11,13 @@ module Akamai
     end
 
     class AuthToken
-        attr_accessor :token_type, :token_name, :key, :algorithm, :salte, 
+        attr_accessor :token_type, :token_name, :key, :algorithm, :salt, 
                 :start_time, :end_time, :window_secondse, :field_delimiter, 
                 :acl_delimiter, :escape_early, :verbose
         
-        def initialize(token_type: nil, token_name: '__token__', key: nil, 
-                algorithm: 'sha256', salt: nil,start_time: nil, end_time: nil, 
-                window_seconds: nil, field_delimiter: '~', acl_delimiter: '!', 
+        def initialize(token_type: nil, token_name: '__token__', key: nil,
+                algorithm: 'sha256', salt: nil, start_time: nil, end_time: nil,
+                window_seconds: nil, field_delimiter: '~', acl_delimiter: '!',
                 escape_early: false, verbose: false)
 
             @token_type = token_type
@@ -140,14 +140,14 @@ module Akamai
             end
 
             if @salt
-                hash_code.push('salt=%s', _escapeEarly(salt))
+                hash_code.push('salt=%s', @salt)
             end
             if !(['sha256', 'sha1', 'md5'].include? @algorithm)
                 raise AuthTokenError, 'Unknown algorithm'
             end
             
             bin_key = Array(@key.gsub(/\s/,'')).pack("H*")
-            digest = OpenSSL::Digest::Digest.new(@algorithm)
+            digest = OpenSSL::Digest.new(@algorithm)
             token_hmac = OpenSSL::HMAC.new(bin_key, digest)
             token_hmac.update(hash_code.join(@field_delimiter))
 

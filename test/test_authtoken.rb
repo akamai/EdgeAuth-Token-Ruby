@@ -169,7 +169,47 @@ class TestAuthToken < Test::Unit::TestCase
         query_salt_path = "/salt"
         ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, salt: AT_SALT, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: true)
         token = ats.generateToken(url: query_salt_path)
-        uri = URI("http://#{AT_HOSTNAME}#{query_salt_path}?#{ats.token_name}?#{token}")
+        uri = URI("http://#{AT_HOSTNAME}#{query_salt_path}?#{ats.token_name}=#{token}")
+        res = Net::HTTP.get_response(uri)
+        assert_equal("404", res.code)
+    end
+    ##########
+
+    ##########
+    # ACL TEST
+    ##########
+    def test_acl_escape_on__ignoreQuery_yes
+        _test_case_set("/q_escape_ignore", "/c_escape_ignore", "/h_escape_ignore", false, false)
+    end
+
+    def test_acl_escape_off__ignoreQuery_yes
+        _test_case_set("/q_ignore", "/c_ignore", "/h_ignore", false, false)
+    end
+
+    def test_acl_escape_on__ignoreQuery_no
+        _test_case_set("/q_escape", "/c_escape", "/h_escape", false, false)
+    end
+
+    def test_acl_escape_off__ignoreQuery_no
+        _test_case_set("/q", "/c", "/h", false, false)
+    end
+    
+    def test_acl_asta_escape_on__ignoreQuery_yes
+        ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
+        token = ats.generateToken(acl: '/q_escape_ignore/*')
+        uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore/hello?#{ats.token_name}=#{token}")
+        res = Net::HTTP.get_response(uri)
+        assert_equal("404", res.code)
+    end
+
+    def test_acl_deli_escape_on__ignoreQuery_yes
+        ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
+        token = ats.generateToken(acl: '/q_escape_ignore!/q_escape_ignore/*')
+        uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore?#{ats.token_name}=#{token}")
+        res = Net::HTTP.get_response(uri)
+        assert_equal("404", res.code)
+
+        uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore/world/?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
     end
