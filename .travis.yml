@@ -1,0 +1,12 @@
+language: ruby
+rvm:
+  - 2.0
+  - 2.1
+  - 2.2
+
+script:
+  - export AT_HOSTNAME=$AT_HOSTNAME
+  - export AT_ENCRYPTION_KEY=$AT_ENCRYPTION_KEY
+  - export AT_TRANSITION_KEY=$AT_TRANSITION_KEY
+  - export AT_SALT=$AT_SALT
+  - ruby test/test_authtoken.py
