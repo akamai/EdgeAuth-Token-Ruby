@@ -10,6 +10,7 @@ module Akamai
         """Base-class for all exceptions raised by AuthToken Class"""
     end
 
+
     class AuthToken
         attr_accessor :token_type, :token_name, :key, :algorithm, :salt, 
                 :start_time, :end_time, :window_secondse, :field_delimiter, 
