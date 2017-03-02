@@ -136,12 +136,13 @@ module Akamai
             end
 
             hash_code = new_token.clone
+            
             if url and !acl
                 hash_code.push('url=%s' % _escapeEarly(url))
             end
 
             if @salt
-                hash_code.push('salt=%s', @salt)
+                hash_code.push('salt=%s' % @salt)
             end
             if !(['sha256', 'sha1', 'md5'].include? @algorithm)
                 raise AuthTokenError, 'Unknown algorithm'
