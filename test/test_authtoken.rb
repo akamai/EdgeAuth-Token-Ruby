@@ -78,7 +78,7 @@ class TestAuthToken < Test::Unit::TestCase
         end
 
         uri = URI("http://#{AT_HOSTNAME}#{path}")
-        http = Net::HTTP.new(uri.host, uri.port)
+        http = Net::HTTP.new(uri.host)
         req = Net::HTTP::Get.new(uri)
         req['Cookie'] = "#{@cat.token_name}=#{token}"
         res = http.request(req)
@@ -95,7 +95,7 @@ class TestAuthToken < Test::Unit::TestCase
         end
 
         uri = URI("http://#{AT_HOSTNAME}#{path}")
-        http = Net::HTTP.new(uri.host, uri.port)
+        http = Net::HTTP.new(uri.host)
         req = Net::HTTP::Get.new(uri)
         req[@hat.token_name] = token
         res = http.request(req)
