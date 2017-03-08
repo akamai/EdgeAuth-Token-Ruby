@@ -7,7 +7,7 @@ It's a behavior which is Auth Token 2.0 Verification.
 Akamai-AuthToken supports Ruby 2.0+. (This is Akamai unofficial code)
 
 
-# Installation
+## Installation
 
 To install Akamai Authorization Token for Ruby:  
 
@@ -16,7 +16,7 @@ To install Akamai Authorization Token for Ruby:
 ```
   
   
-# Example
+## Example
 
 ```ruby
     require 'net/http' # Just for this Example
@@ -30,7 +30,7 @@ AA_ENCRYPTION_KEY must be hexadecimal digit string with even-length.
 Don't expose AA_ENCRYPTION_KEY on the public repository.  
 
 
-### URL parameter option
+#### URL parameter option
 
 ```ruby
     path = "/akamai/authtoken"
@@ -62,68 +62,57 @@ In [Example 2], it's only okay for 'Ignore query string' option on in the proper
 If you want to 'Ignore query string' off using query string as your token, Please contact your Akamai representative.  
 
 
-# Usage
+## Usage
 
-### AuthToken Class
+#### AuthToken Class
 
 ```ruby
-    class AuthToken
-        def initialize(token_type: nil, token_name: '__token__', key: nil,
-                    algorithm: 'sha256', salt: nil, start_time: nil, end_time: nil,
-                    window_seconds: nil, field_delimiter: '~', acl_delimiter: '!',
-                    escape_early: false, verbose: false)
+class AuthToken
+    def initialize(token_type: nil, token_name: '__token__', key: nil,
+                algorithm: 'sha256', salt: nil, start_time: nil, end_time: nil,
+                window_seconds: nil, field_delimiter: '~', acl_delimiter: '!',
+                escape_early: false, verbose: false)
 ```
 
-====================  ===================================================================================================
-    Parameter             Description
-====================  ===================================================================================================
-    token_type            Select a preset. (Not Supported Yet)  
-    token_name            Parameter name for the new token. [Default: __token__]
-    key                   Secret required to generate the token. It must be hexadecimal digit string with even-length.
-    algorithm             Algorithm to use to generate the token. (sha1, sha256, or md5) [Default:sha256]
-    salt                  Additional data validated by the token but NOT included in the token body. (It will be deprecated)
-    start_time            What is the start time? (Use string 'now' for the current time)
-    end_time              When does this token expire? 'end_time' overrides 'window_seconds'
-    window_seconds        How long is this token valid for?
-    field_delimiter       Character used to delimit token body fields. [Default: ~]
-    acl_delimiter         Character used to delimit acl fields. [Default: !]
-    escape_early          Causes strings to be 'url' encoded before being used.
-    verbose               Print all parameters.
-====================  ===================================================================================================
+| Parameter       | Description                                                                                        |
+|-----------------|----------------------------------------------------------------------------------------------------|
+| token_type      | Select a preset. (Not Supported Yet)                                                               |
+| token_name      | Parameter name for the new token. [Default: __token__]                                             |
+| key             | Secret required to generate the token. It must be hexadecimal digit string with even-length.       |
+| algorithm       | Algorithm to use to generate the token. (sha1, sha256, or md5) [Default:sha256]                    |
+| salt            | Additional data validated by the token but NOT included in the token body. (It will be deprecated) |
+| start_time      | What is the start time? (Use string 'now' for the current time)                                    |
+| end_time        | When does this token expire? 'end_time' overrides 'window_seconds'                                 |
+| window_seconds  | How long is this token valid for?                                                                  |
+| field_delimiter | Character used to delimit token body fields. [Default: ~]                                          |
+| acl_delimiter   | Character used to delimit acl fields. [Default: !]                                                 |
+| escape_early    | Causes strings to be 'url' encoded before being used.                                              |
+| verbose         | Print all parameters.                                                                              |
 
 
-### AuthToken's Method
+#### AuthToken's Method
 
 ```ruby
 
-    generateToken(url: nil, acl: nil, start_time: nil, end_time: nil, 
-        window_seconds: nil, ip: nil, payload: nil, session_id: nil)
-    
-    # Returns the authorization token string.
+generateToken(url: nil, acl: nil, start_time: nil, end_time: nil, 
+    window_seconds: nil, ip: nil, payload: nil, session_id: nil)
+
+# Returns the authorization token string.
 ```
 
-+----------------+---------------------------------------------------------------------------------------------------------+
 | Parameter      | Description                                                                                             |
-+================+=========================================================================================================+
+|----------------|-----------------------------------------------------------------------------------------------|
 | url            | Single URL path.                                                                                        |
-+----------------+---------------------------------------------------------------------------------------------------------+
 | acl            | Access control list delimited by ! [ie. /\*]                                                            |
-+----------------+---------------------------------------------------------------------------------------------------------+
 | start_time     |                                                                                                         |
-+----------------+                                                                                                         +
 | end_time       | Same as Authtoken's variables, but they overrides Authtoken's.                                          |
-+----------------+                                                                                                         +
 | window_seconds |                                                                                                         |
-+----------------+---------------------------------------------------------------------------------------------------------+
 | ip             | IP Address to restrict this token to. (Troublesome in many cases (roaming, NAT, etc) so not often used) |
-+----------------+---------------------------------------------------------------------------------------------------------+
 | payload        | Additional text added to the calculated digest.                                                         |
-+----------------+---------------------------------------------------------------------------------------------------------+
 | session_id     | The session identifier for single use tokens or other advanced cases.                                   |
-+----------------+---------------------------------------------------------------------------------------------------------+
 
 
-# License
+## License
 
 Copyright 2017 Akamai Technologies, Inc.  All rights reserved.
 
