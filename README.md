@@ -124,8 +124,8 @@ class AuthToken
 #### AuthToken's Method
 
 ```ruby
-generateToken(url: nil, acl: nil, start_time: nil, end_time: nil, 
-            window_seconds: nil, ip: nil, payload: nil, session_id: nil)
+def generateToken(url: nil, acl: nil, start_time: nil, end_time: nil, 
+                window_seconds: nil, ip: nil, payload: nil, session_id: nil)
 
 # Returns the authorization token string.
 ```
