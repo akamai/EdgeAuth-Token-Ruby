@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'akamai-authtoken'
-  s.version     = '0.1.0'
-  s.date        = '2017-03-03'
+  s.version     = '0.4.0'
+  s.date        = '2017-03-09'
   s.summary     = 'Akamai Authorization Token for Ruby'
   s.description = 'Akamai-AuthToken is Akamai Authorization Token for Ruby 2.0+'
   s.authors     = ['Astin Choi']
