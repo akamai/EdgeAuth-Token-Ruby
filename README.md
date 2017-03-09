@@ -80,9 +80,9 @@ res = http.request(req)
 p res
 
 # 2) Cookie Delimited by '!'
-token = at.generateToken(acl: "/akamai/authtoken/list!/akamai/authtoken/list/*")
+token = at.generateToken(acl: "/akamai/authtoken!/akamai/authtoken/list/*")
 uri = URI("http://#{AT_HOSTNAME}/akamai/authtoken/list/something2")
-    # or URI("http://#{AT_HOSTNAME}/akamai/authtoken/list")
+    # or URI("http://#{AT_HOSTNAME}/akamai/authtoken")
 
 http = Net::HTTP.new(uri.host)
 req = Net::HTTP::Get.new(uri)
