@@ -204,7 +204,8 @@ class TestAuthToken < Test::Unit::TestCase
 
     def test_acl_deli_escape_on__ignoreQuery_yes
         ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
-        token = ats.generateToken(acl: '/q_escape_ignore!/q_escape_ignore/*')
+        acl = ["/q_escape_ignore", "/q_escape_ignore/*"]
+        token = ats.generateToken(acl: acl.join(Akamai::AuthToken.ACL_DELIMITER))
         uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)

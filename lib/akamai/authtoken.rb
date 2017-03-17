@@ -1,9 +1,25 @@
+# Copyright 2017 Akamai Technologies http://developer.akamai.com.
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 require 'cgi'
 require 'openssl'
 require 'optparse'
 
 
 ENV['TZ'] = 'GMT'
+
 
 module Akamai
     class AuthTokenError < Exception
@@ -16,10 +32,14 @@ module Akamai
                 :start_time, :end_time, :window_secondse, :field_delimiter, 
                 :acl_delimiter, :escape_early, :verbose
         
+        @@acl_delimiter = '!'
+        def self.ACL_DELIMITER
+            @@acl_delimiter
+        end
+        
         def initialize(token_type: nil, token_name: '__token__', key: nil,
                 algorithm: 'sha256', salt: nil, start_time: nil, end_time: nil,
-                window_seconds: nil, field_delimiter: '~', acl_delimiter: '!',
-                escape_early: false, verbose: false)
+                window_seconds: nil, field_delimiter: '~', escape_early: false, verbose: false)
 
             @token_type = token_type
             @token_name = token_name
@@ -34,7 +54,6 @@ module Akamai
             @algorithm = algorithm
             @salt = salt
             @field_delimiter = field_delimiter
-            @acl_delimiter = acl_delimiter
             @escape_early = escape_early
             @verbose = verbose
         end
@@ -110,7 +129,7 @@ module Akamai
                 puts "Salt            : #{@salt}"
                 puts "Session ID      : #{session_id}"
                 puts "Field Delimiter : #{@field_delimiter}"
-                puts "ACL Delimiter   : #{@acl_delimiter}"
+                puts "ACL Delimiter   : #{@@acl_delimiter}"
                 puts "Escape Early    : #{@escape_early}"
             end
 

@@ -80,7 +80,8 @@ res = http.request(req)
 p res
 
 # 2) Cookie Delimited by '!'
-token = at.generateToken(acl: "/akamai/authtoken!/akamai/authtoken/list/*")
+acl = ["/akamai/authtoken", "/akamai/authtoken/list/*"]
+token = at.generateToken(acl: acl.join(Akamai::AuthToken.ACL_DELIMITER))
 uri = URI("http://#{AT_HOSTNAME}/akamai/authtoken/list/something2")
     # or URI("http://#{AT_HOSTNAME}/akamai/authtoken")
 
@@ -101,8 +102,7 @@ It doesn't matter turning on/off 'Escape token input' in the property manager, b
 class AuthToken
     def initialize(token_type: nil, token_name: '__token__', key: nil,
                 algorithm: 'sha256', salt: nil, start_time: nil, end_time: nil,
-                window_seconds: nil, field_delimiter: '~', acl_delimiter: '!',
-                escape_early: false, verbose: false)
+                window_seconds: nil, field_delimiter: '~', escape_early: false, verbose: false)
 ```
 
 | Parameter | Description |
@@ -116,10 +116,14 @@ class AuthToken
 | end_time | When does this token expire? 'end_time' overrides 'window_seconds' |
 | window_seconds | How long is this token valid for? |
 | field_delimiter | Character used to delimit token body fields. [Default: ~] |
-| acl_delimiter | Character used to delimit acl fields. [Default: !] |
 | escape_early | Causes strings to be 'url' encoded before being used. |
 | verbose | Print all parameters. |
 
+#### AuthToken Static Variable
+
+```ruby
+ACL_DELIMITER = '!' # Character used to delimit acl fields.
+```
 
 #### AuthToken's Method
 
