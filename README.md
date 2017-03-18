@@ -108,14 +108,14 @@ class AuthToken
 | Parameter | Description |
 |-----------|-------------|
 | token_type | Select a preset. (Not Supported Yet) |
-| token_name | Parameter name for the new token. [Default: \__token\__] |
+| token_name | Parameter name for the new token. [ Default: \_\_token\_\_ ] |
 | key | Secret required to generate the token. It must be hexadecimal digit string with even-length. |
 | algorithm  | Algorithm to use to generate the token. (sha1, sha256, or md5) [Default:sha256] |
 | salt | Additional data validated by the token but NOT included in the token body. (It will be deprecated) |
 | start_time | What is the start time? (Use string 'now' for the current time) |
 | end_time | When does this token expire? 'end_time' overrides 'window_seconds' |
 | window_seconds | How long is this token valid for? |
-| field_delimiter | Character used to delimit token body fields. [Default: ~] |
+| field_delimiter | Character used to delimit token body fields. [ Default: ~ ] |
 | escape_early | Causes strings to be 'url' encoded before being used. |
 | verbose | Print all parameters. |
 
@@ -137,7 +137,7 @@ def generateToken(url: nil, acl: nil, start_time: nil, end_time: nil,
 | Parameter | Description |
 |-----------|-------------|
 | url | Single URL path. |
-| acl | Access control list delimited by ! [ie. /\*] |
+| acl | Access control list delimited by ! [ ie. /\* ] |
 | start_time <br/> end_time <br/> window_seconds | Same as Authtoken's parameters, but they overrides Authtoken's. |
 | ip | IP Address to restrict this token to. (Troublesome in many cases (roaming, NAT, etc) so not often used) |
 | payload | Additional text added to the calculated digest. |
