@@ -81,16 +81,35 @@ module Akamai
 
             if start_time.to_s.downcase == 'now'
                 start_time = Time.new.getgm.to_i
-            elsif start_time && !(start_time.is_a? Integer)
-                raise AuthTokenError, 'start_time must be numeric or now'
+            elsif start_time
+                begin
+                    if start_time <= 0
+                        raise AuthTokenError, 'start_time must be ( > 0 )'
+                    end
+                rescue
+                    raise AuthTokenError, 'start_time must be numeric or now'
+                end
+                
             end
 
-            if end_time && !(end_time.is_a? Integer)
-                raise AuthTokenError, 'end_time must be numeric or now'
+            if end_time
+                begin
+                    if end_time <= 0
+                        raise AuthTokenError, 'end_time must be ( > 0 )'
+                    end
+                rescue
+                    raise AuthTokenError, 'end_time must be numeric'
+                end
             end
 
-            if window_seconds && !(window_seconds.is_a? Integer)
-                raise AuthTokenError, 'window_seconds must be numeric or now'
+            if window_seconds
+                begin
+                    if window_seconds <= 0
+                        raise AuthTokenError, 'window_seconds must be ( > 0 )'
+                    end
+                rescue
+                    raise AuthTokenError, 'window_seconds must be numeric'
+                end
             end
 
             if !end_time
@@ -105,7 +124,7 @@ module Akamai
                 end
             end
 
-            if start_time && end_time < start_time
+            if start_time && end_time <= start_time
                 raise AuthTokenError, 'Token will have already expired.'
             end
 

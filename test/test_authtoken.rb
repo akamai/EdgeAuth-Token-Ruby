@@ -215,4 +215,31 @@ class TestAuthToken < Test::Unit::TestCase
         assert_equal("404", res.code)
     end
     ##########
+
+    def test_times
+        att = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS)
+        # start_time
+        assert_raise Akamai::AuthTokenError do
+            att.generateToken(start_time: -1)
+        end
+        assert_raise Akamai::AuthTokenError do
+            att.generateToken(start_time: 'hello')
+        end
+
+        # end_time
+        assert_raise Akamai::AuthTokenError do
+            att.generateToken(end_time: -1)
+        end
+        assert_raise Akamai::AuthTokenError do
+            att.generateToken(end_time: 'hello')
+        end
+
+        # window_seconds
+        assert_raise Akamai::AuthTokenError do
+            att.generateToken(window_seconds: -1)
+        end
+        assert_raise Akamai::AuthTokenError do
+            att.generateToken(window_seconds: 'hello')
+        end
+    end
 end
