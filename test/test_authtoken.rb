@@ -5,13 +5,13 @@ require_relative '../lib/akamai/authtoken'
 
 
 # export TEST_MODE=LOCAL
-if ENV['TEST_MODE'] == 'LOCAL'
-    require_relative 'secrets'
-else
+if ENV['TEST_MODE'] == 'TRAVIS'
     AT_HOSTNAME = ENV['AT_HOSTNAME']
     AT_ENCRYPTION_KEY = ENV['AT_ENCRYPTION_KEY']
     AT_TRANSITION_KEY = ENV['AT_TRANSITION_KEY']
     AT_SALT = ENV['AT_SALT']
+else
+    require_relative 'secrets'
 end
 DEFAULT_WINDOW_SECONDS = 500
 
@@ -57,9 +57,9 @@ class TestAuthToken < Test::Unit::TestCase
         _token_setting('q', escape_early, transition)
         
         if isUrl
-            token = @at.generateToken(url: path, payload: nil, session_id: nil)
+            token = @at.generateToken(url: path, payload: payload, session_id: session_id)
         else
-            token = @at.generateToken(acl: path, payload: nil, session_id: nil)
+            token = @at.generateToken(acl: path, payload: payload, session_id: session_id)
         end
         
         uri = URI("http://#{AT_HOSTNAME}#{path}"\
@@ -72,9 +72,9 @@ class TestAuthToken < Test::Unit::TestCase
                            payload: nil, session_id: nil, isUrl: true)
         _token_setting('c', escape_early, transition)
         if isUrl
-            token = @cat.generateToken(url: path, payload: nil, session_id: nil)
+            token = @cat.generateToken(url: path, payload: payload, session_id: session_id)
         else
-            token = @cat.generateToken(acl: path, payload: nil, session_id: nil)
+            token = @cat.generateToken(acl: path, payload: payload, session_id: session_id)
         end
 
         uri = URI("http://#{AT_HOSTNAME}#{path}")
@@ -89,9 +89,9 @@ class TestAuthToken < Test::Unit::TestCase
                            payload: nil, session_id: nil, isUrl: true)
         _token_setting('h', escape_early, transition)
         if isUrl
-            token = @hat.generateToken(url: path, payload: nil, session_id: nil)
+            token = @hat.generateToken(url: path, payload: payload, session_id: session_id)
         else
-            token = @hat.generateToken(acl: path, payload: nil, session_id: nil)
+            token = @hat.generateToken(acl: path, payload: payload, session_id: session_id)
         end
 
         uri = URI("http://#{AT_HOSTNAME}#{path}")

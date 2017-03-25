@@ -113,7 +113,7 @@ module Akamai
             end
 
             if !end_time
-                if window_seconds.to_i > 0
+                if window_seconds
                     if !start_time
                         end_time = Time.new.getgm.to_i + window_seconds
                     else

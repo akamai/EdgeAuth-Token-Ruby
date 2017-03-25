@@ -110,7 +110,7 @@ class AuthToken
 | token_type | Select a preset. (Not Supported Yet) |
 | token_name | Parameter name for the new token. [ Default: \_\_token\_\_ ] |
 | key | Secret required to generate the token. It must be hexadecimal digit string with even-length. |
-| algorithm  | Algorithm to use to generate the token. (sha1, sha256, or md5) [Default:sha256] |
+| algorithm  | Algorithm to use to generate the token. (sha1, sha256, or md5) [ Default:sha256 ] |
 | salt | Additional data validated by the token but NOT included in the token body. (It will be deprecated) |
 | start_time | What is the start time? (Use string 'now' for the current time) |
 | end_time | When does this token expire? 'end_time' overrides 'window_seconds' |
