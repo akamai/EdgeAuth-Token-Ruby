@@ -1,34 +1,34 @@
 require 'net/http'
 require 'test/unit'
 
-require_relative '../lib/akamai/authtoken'
+require_relative '../lib/akamai/edgeauth'
 
 
 # export TEST_MODE=LOCAL
 if ENV['TEST_MODE'] == 'TRAVIS'
-    AT_HOSTNAME = ENV['AT_HOSTNAME']
-    AT_ENCRYPTION_KEY = ENV['AT_ENCRYPTION_KEY']
-    AT_TRANSITION_KEY = ENV['AT_TRANSITION_KEY']
-    AT_SALT = ENV['AT_SALT']
+    ET_HOSTNAME = ENV['ET_HOSTNAME']
+    ET_ENCRYPTION_KEY = ENV['ET_ENCRYPTION_KEY']
+    ET_TRANSITION_KEY = ENV['ET_TRANSITION_KEY']
+    ET_SALT = ENV['ET_SALT']
 else
     require_relative 'secrets'
 end
 DEFAULT_WINDOW_SECONDS = 500
 
 
-class TestAuthToken < Test::Unit::TestCase
+class TestEdgeAuth < Test::Unit::TestCase
     def setup
         # Test for Query String
-        @at = Akamai::AuthToken.new(**{key: AT_ENCRYPTION_KEY,
+        @at = Akamai::EdgeAuth.new(**{key: ET_ENCRYPTION_KEY,
                                    window_seconds: DEFAULT_WINDOW_SECONDS})
         
         # Test for Cookie
-        @cat = Akamai::AuthToken.new(**{key: AT_ENCRYPTION_KEY, 
+        @cat = Akamai::EdgeAuth.new(**{key: ET_ENCRYPTION_KEY, 
                                     algorithm: 'sha1', 
                                     window_seconds: DEFAULT_WINDOW_SECONDS})
 
         # Test for Header
-        @hat = Akamai::AuthToken.new(**{key: AT_ENCRYPTION_KEY, 
+        @hat = Akamai::EdgeAuth.new(**{key: ET_ENCRYPTION_KEY, 
                                     algorithm: 'md5', 
                                     window_seconds: DEFAULT_WINDOW_SECONDS})
     end
@@ -44,9 +44,9 @@ class TestAuthToken < Test::Unit::TestCase
         end
 
         if transition
-            t.key = AT_TRANSITION_KEY
+            t.key = ET_TRANSITION_KEY
         else
-            t.key = AT_ENCRYPTION_KEY
+            t.key = ET_ENCRYPTION_KEY
         end
 
         t.escape_early = escape_early
@@ -62,7 +62,7 @@ class TestAuthToken < Test::Unit::TestCase
             token = @at.generateToken(acl: path, payload: payload, session_id: session_id)
         end
         
-        uri = URI("http://#{AT_HOSTNAME}#{path}"\
+        uri = URI("http://#{ET_HOSTNAME}#{path}"\
                   "#{path.include?('?') ? '&' : '?' }#{@at.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal(expacted, res.code)
@@ -77,7 +77,7 @@ class TestAuthToken < Test::Unit::TestCase
             token = @cat.generateToken(acl: path, payload: payload, session_id: session_id)
         end
 
-        uri = URI("http://#{AT_HOSTNAME}#{path}")
+        uri = URI("http://#{ET_HOSTNAME}#{path}")
         http = Net::HTTP.new(uri.host)
         req = Net::HTTP::Get.new(uri)
         req['Cookie'] = "#{@cat.token_name}=#{token}"
@@ -94,7 +94,7 @@ class TestAuthToken < Test::Unit::TestCase
             token = @hat.generateToken(acl: path, payload: payload, session_id: session_id)
         end
 
-        uri = URI("http://#{AT_HOSTNAME}#{path}")
+        uri = URI("http://#{ET_HOSTNAME}#{path}")
         http = Net::HTTP.new(uri.host)
         req = Net::HTTP::Get.new(uri)
         req[@hat.token_name] = token
@@ -167,9 +167,9 @@ class TestAuthToken < Test::Unit::TestCase
     
     def test_url_query_escape_on__ignore_yes_with_salt
         query_salt_path = "/salt"
-        ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, salt: AT_SALT, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: true)
+        ats = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, salt: ET_SALT, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: true)
         token = ats.generateToken(url: query_salt_path)
-        uri = URI("http://#{AT_HOSTNAME}#{query_salt_path}?#{ats.token_name}=#{token}")
+        uri = URI("http://#{ET_HOSTNAME}#{query_salt_path}?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
     end
@@ -195,50 +195,50 @@ class TestAuthToken < Test::Unit::TestCase
     end
     
     def test_acl_asta_escape_on__ignoreQuery_yes
-        ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
+        ats = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
         token = ats.generateToken(acl: '/q_escape_ignore/*')
-        uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore/hello?#{ats.token_name}=#{token}")
+        uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore/hello?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
     end
 
     def test_acl_deli_escape_on__ignoreQuery_yes
-        ats = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
+        ats = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
         acl = ["/q_escape_ignore", "/q_escape_ignore/*"]
-        token = ats.generateToken(acl: acl.join(Akamai::AuthToken.ACL_DELIMITER))
-        uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore?#{ats.token_name}=#{token}")
+        token = ats.generateToken(acl: acl.join(Akamai::EdgeAuth.ACL_DELIMITER))
+        uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
 
-        uri = URI("http://#{AT_HOSTNAME}/q_escape_ignore/world/?#{ats.token_name}=#{token}")
+        uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore/world/?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
     end
     ##########
 
     def test_times
-        att = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS)
+        att = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS)
         # start_time
-        assert_raise Akamai::AuthTokenError do
+        assert_raise Akamai::EdgeAuthError do
             att.generateToken(start_time: -1)
         end
-        assert_raise Akamai::AuthTokenError do
+        assert_raise Akamai::EdgeAuthError do
             att.generateToken(start_time: 'hello')
         end
 
         # end_time
-        assert_raise Akamai::AuthTokenError do
+        assert_raise Akamai::EdgeAuthError do
             att.generateToken(end_time: -1)
         end
-        assert_raise Akamai::AuthTokenError do
+        assert_raise Akamai::EdgeAuthError do
             att.generateToken(end_time: 'hello')
         end
 
         # window_seconds
-        assert_raise Akamai::AuthTokenError do
+        assert_raise Akamai::EdgeAuthError do
             att.generateToken(window_seconds: -1)
         end
-        assert_raise Akamai::AuthTokenError do
+        assert_raise Akamai::EdgeAuthError do
             att.generateToken(window_seconds: 'hello')
         end
     end

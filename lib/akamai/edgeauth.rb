@@ -22,12 +22,12 @@ ENV['TZ'] = 'GMT'
 
 
 module Akamai
-    class AuthTokenError < Exception
-        """Base-class for all exceptions raised by AuthToken Class"""
+    class EdgeAuthError < Exception
+        """Base-class for all exceptions raised by EdgeAuth Class"""
     end
 
 
-    class AuthToken
+    class EdgeAuth
         attr_accessor :token_type, :token_name, :key, :algorithm, :salt, 
                 :start_time, :end_time, :window_secondse, :field_delimiter, 
                 :acl_delimiter, :escape_early, :verbose
@@ -47,7 +47,7 @@ module Akamai
             @end_time = end_time
             @window_seconds = window_seconds
             if !key || key.length <= 0
-                raise AuthTokenError, 
+                raise EdgeAuthError, 
                     'You must provide a secret in order to generate a new token.'
             end
             @key = key
@@ -84,10 +84,10 @@ module Akamai
             elsif start_time
                 begin
                     if start_time <= 0
-                        raise AuthTokenError, 'start_time must be ( > 0 )'
+                        raise EdgeAuthError, 'start_time must be ( > 0 )'
                     end
                 rescue
-                    raise AuthTokenError, 'start_time must be numeric or now'
+                    raise EdgeAuthError, 'start_time must be numeric or now'
                 end
                 
             end
@@ -95,20 +95,20 @@ module Akamai
             if end_time
                 begin
                     if end_time <= 0
-                        raise AuthTokenError, 'end_time must be ( > 0 )'
+                        raise EdgeAuthError, 'end_time must be ( > 0 )'
                     end
                 rescue
-                    raise AuthTokenError, 'end_time must be numeric'
+                    raise EdgeAuthError, 'end_time must be numeric'
                 end
             end
 
             if window_seconds
                 begin
                     if window_seconds <= 0
-                        raise AuthTokenError, 'window_seconds must be ( > 0 )'
+                        raise EdgeAuthError, 'window_seconds must be ( > 0 )'
                     end
                 rescue
-                    raise AuthTokenError, 'window_seconds must be numeric'
+                    raise EdgeAuthError, 'window_seconds must be numeric'
                 end
             end
 
@@ -120,16 +120,16 @@ module Akamai
                         end_time = start_time + window_seconds
                     end
                 else
-                    raise AuthTokenError, 'You must provide an expiration time or a duration window..'
+                    raise EdgeAuthError, 'You must provide an expiration time or a duration window..'
                 end
             end
 
             if start_time && end_time <= start_time
-                raise AuthTokenError, 'Token will have already expired.'
+                raise EdgeAuthError, 'Token will have already expired.'
             end
 
             if (!acl && !url) || (acl && url)
-                raise AuthTokenError, 'You must provide a URL or an ACL'
+                raise EdgeAuthError, 'You must provide a URL or an ACL'
             end
 
             if @verbose
@@ -183,7 +183,7 @@ module Akamai
                 hash_code.push('salt=%s' % @salt)
             end
             if !(['sha256', 'sha1', 'md5'].include? @algorithm)
-                raise AuthTokenError, 'Unknown algorithm'
+                raise EdgeAuthError, 'Unknown algorithm'
             end
             
             bin_key = Array(@key.gsub(/\s/,'')).pack("H*")

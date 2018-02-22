@@ -1,24 +1,24 @@
-# Akamai-AuthToken: Akamai Authorization Token for Ruby
+# Akamai-EdgeAuth: Akamai Edge Authorization Token for Ruby
 
-[![Gem Version](https://badge.fury.io/rb/akamai-authtoken.svg)](https://badge.fury.io/rb/akamai-authtoken)
-[![Build Status](https://travis-ci.org/AstinCHOI/Akamai-AuthToken-Ruby.svg?branch=master)](https://travis-ci.org/AstinCHOI/Akamai-AuthToken-Ruby)
-[![License](http://img.shields.io/:license-apache-blue.svg)](https://github.com/AstinCHOI/Akamai-AuthToken-Ruby/blob/master/LICENSE)
+[![Gem Version](https://badge.fury.io/rb/akamai-edgeauth.svg)](https://badge.fury.io/rb/akamai-edgeauth)
+[![Build Status](https://travis-ci.org/AstinCHOI/Akamai-EdgeAuth-Ruby.svg?branch=master)](https://travis-ci.org/AstinCHOI/Akamai-EdgeAuth-Ruby)
+[![License](http://img.shields.io/:license-apache-blue.svg)](https://github.com/AstinCHOI/Akamai-EdgeAuth-Ruby/blob/master/LICENSE)
 
-Akamai-AuthToken is Akamai Authorization Token in the HTTP Cookie, Query String and Header for a client.
+Akamai-EdgeAuth is Akamai Edge Authorization Token in the HTTP Cookie, Query String and Header for a client.
 You can configure it in the Property Manager at https://control.akamai.com.
 It's a behavior which is Auth Token 2.0 Verification.  
 
-Akamai-AuthToken supports Ruby 2.0+. (This is Akamai unofficial code)
+Akamai-EdgeAuth supports Ruby 2.0+. (This is Akamai unofficial code)
 
-<div style="text-align:center"><img src=https://github.com/AstinCHOI/akamai-asset/blob/master/authtoken/authtoken.png?raw=true /></div>
+<div style="text-align:center"><img src=https://github.com/AstinCHOI/akamai-asset/blob/master/edgeauth/edgeauth.png?raw=true/></div>
 
 
 ## Installation
 
-To install Akamai Authorization Token for Ruby:  
+To install Akamai Edge Authorization Token for Ruby:  
 
 ```shell
-$ gem install akamai-authtoken
+$ gem install akamai-edgeauth
 ```
   
 
@@ -26,37 +26,37 @@ $ gem install akamai-authtoken
 
 ```ruby
 require 'net/http' # Just for this Example
-require 'akamai/authtoken'
+require 'akamai/edgeauth'
 
-AT_HOSTNAME = 'auth-token.akamaized.net'
-AT_ENCRYPTION_KEY = 'YourEncryptionKey' 
+ET_HOSTNAME = 'edgeauth.akamaized.net'
+ET_ENCRYPTION_KEY = 'YourEncryptionKey' 
 DURATION = 500 # seconds
 ```
-AT_ENCRYPTION_KEY must be hexadecimal digit string with even-length.  
-Don't expose AT_ENCRYPTION_KEY on the public repository.  
+ET_ENCRYPTION_KEY must be hexadecimal digit string with even-length.  
+Don't expose ET_ENCRYPTION_KEY on the public repository.  
 
 
 #### URL parameter option
 
 ```ruby
-path = "/akamai/authtoken"
+path = "/akamai/edgeauth"
 
 # 1) Cookie
-at = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, 
+et = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, 
     window_seconds: DURATION, 
     escape_early: true)
-token = at.generateToken(url: path)
-uri = URI("http://#{AT_HOSTNAME}#{path}")
+token = et.generateToken(url: path)
+uri = URI("http://#{ET_HOSTNAME}#{path}")
 
 http = Net::HTTP.new(uri.host)
 req = Net::HTTP::Get.new(uri)
-req['Cookie'] = "#{at.token_name}=#{token}"
+req['Cookie'] = "#{et.token_name}=#{token}"
 res = http.request(req)
 p res # Maybe not 403
 
 # 2) Query string
-token = at.generateToken(url: path)
-uri = URI("http://#{AT_HOSTNAME}#{path}#{at.token_name}=#{token}")
+token = et.generateToken(url: path)
+uri = URI("http://#{ET_HOSTNAME}#{path}#{et.token_name}=#{token}")
 res = Net::HTTP.get_response(uri)
 p res
 ```
@@ -69,25 +69,25 @@ If you want to 'Ignore query string' off using query string as your token, Pleas
 
 ```ruby
 # 1) Header using *
-at = Akamai::AuthToken.new(key: AT_ENCRYPTION_KEY, window_seconds: DURATION)
-token = at.generateToken(acl: "/akamai/authtoken/list/*")
-uri = URI("http://#{AT_HOSTNAME}/akamai/authtoken/list/something")
+et = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DURATION)
+token = et.generateToken(acl: "/akamai/edgeauth/list/*")
+uri = URI("http://#{ET_HOSTNAME}/akamai/edgeauth/list/something")
 
 http = Net::HTTP.new(uri.host)
 req = Net::HTTP::Get.new(uri)
-req[at.token_name] = token
+req[et.token_name] = token
 res = http.request(req)
 p res
 
 # 2) Cookie Delimited by '!'
-acl = ["/akamai/authtoken", "/akamai/authtoken/list/*"]
-token = at.generateToken(acl: acl.join(Akamai::AuthToken.ACL_DELIMITER))
-uri = URI("http://#{AT_HOSTNAME}/akamai/authtoken/list/something2")
-    # or URI("http://#{AT_HOSTNAME}/akamai/authtoken")
+acl = ["/akamai/edgeauth", "/akamai/edgeauth/list/*"]
+token = et.generateToken(acl: acl.join(Akamai::EdgeAuth.ACL_DELIMITER))
+uri = URI("http://#{ET_HOSTNAME}/akamai/edgeauth/list/something2")
+    # or URI("http://#{ET_HOSTNAME}/akamai/edgeauth")
 
 http = Net::HTTP.new(uri.host)
 req = Net::HTTP::Get.new(uri)
-req['Cookie'] = "#{at.token_name}=#{token}"
+req['Cookie'] = "#{et.token_name}=#{token}"
 res = http.request(req)
 p res
 ```
@@ -96,10 +96,10 @@ It doesn't matter turning on/off 'Escape token input' in the property manager, b
 
 ## Usage
 
-#### AuthToken Class
+#### EdgeAuth Class
 
 ```ruby
-class AuthToken
+class EdgeAuth
     def initialize(token_type: nil, token_name: '__token__', key: nil,
                 algorithm: 'sha256', salt: nil, start_time: nil, end_time: nil,
                 window_seconds: nil, field_delimiter: '~', escape_early: false, verbose: false)
@@ -119,13 +119,13 @@ class AuthToken
 | escape_early | Causes strings to be 'url' encoded before being used. |
 | verbose | Print all parameters. |
 
-#### AuthToken Static Variable
+#### EdgeAuth Static Variable
 
 ```ruby
 ACL_DELIMITER = '!' # Character used to delimit acl fields.
 ```
 
-#### AuthToken's Method
+#### EdgeAuth's Method
 
 ```ruby
 def generateToken(url: nil, acl: nil, start_time: nil, end_time: nil, 
