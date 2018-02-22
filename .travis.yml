@@ -4,6 +4,11 @@ rvm:
   - 2.1
   - 2.2
 
+before_install:
+  - gem update --system
+  - gem --version
+  - gem 'test-unit'
+
 script:
   - export TEST_MODE=TRAVIS
   - export ET_HOSTNAME=$AT_HOSTNAME
