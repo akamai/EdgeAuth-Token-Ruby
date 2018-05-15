@@ -33,7 +33,7 @@ class TestEdgeAuth < Test::Unit::TestCase
                                     window_seconds: DEFAULT_WINDOW_SECONDS})
     end
 
-    def _token_setting(ttype, escape_early, transition)
+    def _token_setting(ttype, escape_early, transition, payload, session_id)
         t = nil
         if ttype == 'q'
             t = @at
@@ -43,23 +43,25 @@ class TestEdgeAuth < Test::Unit::TestCase
             t = @hat
         end
 
+        t.payload = payload
+        t.session_id = session_id
+        t.escape_early = escape_early
+
         if transition
             t.key = ET_TRANSITION_KEY
         else
             t.key = ET_ENCRYPTION_KEY
         end
-
-        t.escape_early = escape_early
     end
 
     def _queryAssertEqual(path, expacted, escape_early: false, transition: false,
                           payload: nil, session_id: nil, isUrl: true)
-        _token_setting('q', escape_early, transition)
+        _token_setting('q', escape_early, transition, payload, session_id)
         
         if isUrl
-            token = @at.generateToken(url: path, payload: payload, session_id: session_id)
+            token = @at.generateURLToken(path)
         else
-            token = @at.generateToken(acl: path, payload: payload, session_id: session_id)
+            token = @at.generateACLToken(path)
         end
         
         uri = URI("http://#{ET_HOSTNAME}#{path}"\
@@ -70,11 +72,11 @@ class TestEdgeAuth < Test::Unit::TestCase
 
     def _cookieAssertEqual(path, expacted, escape_early: false, transition: false,
                            payload: nil, session_id: nil, isUrl: true)
-        _token_setting('c', escape_early, transition)
+        _token_setting('c', escape_early, transition, payload, session_id)
         if isUrl
-            token = @cat.generateToken(url: path, payload: payload, session_id: session_id)
+            token = @cat.generateURLToken(path)
         else
-            token = @cat.generateToken(acl: path, payload: payload, session_id: session_id)
+            token = @cat.generateACLToken(path)
         end
 
         uri = URI("http://#{ET_HOSTNAME}#{path}")
@@ -87,11 +89,11 @@ class TestEdgeAuth < Test::Unit::TestCase
 
     def _headerAssertEqual(path, expacted, escape_early: false, transition: false,
                            payload: nil, session_id: nil, isUrl: true)
-        _token_setting('h', escape_early, transition)
+        _token_setting('h', escape_early, transition, payload, session_id)
         if isUrl
-            token = @hat.generateToken(url: path, payload: payload, session_id: session_id)
+            token = @hat.generateURLToken(path)
         else
-            token = @hat.generateToken(acl: path, payload: payload, session_id: session_id)
+            token = @hat.generateACLToken(path)
         end
 
         uri = URI("http://#{ET_HOSTNAME}#{path}")
@@ -106,13 +108,6 @@ class TestEdgeAuth < Test::Unit::TestCase
         _queryAssertEqual(query_path, "404", escape_early: escape_early, isUrl: isUrl)
         _cookieAssertEqual(cookie_path, "404", escape_early: escape_early, isUrl: isUrl)
         _headerAssertEqual(header_path, "404", escape_early: escape_early, isUrl: isUrl)
-
-        if isUrl
-            query_string="?foo=bar&hello=world"
-            _queryAssertEqual(query_path + query_string, "403", escape_early: (false==escape_early), isUrl: isUrl)
-            _cookieAssertEqual(cookie_path + query_string, "403", escape_early: (false==escape_early), isUrl: isUrl)
-            _headerAssertEqual(header_path + query_string, "403", escape_early: (false==escape_early), isUrl: isUrl)
-        end
 
         # Transition Key Test
         _queryAssertEqual(query_path, "404", transition: true, escape_early: escape_early, isUrl: isUrl)
@@ -168,7 +163,7 @@ class TestEdgeAuth < Test::Unit::TestCase
     def test_url_query_escape_on__ignore_yes_with_salt
         query_salt_path = "/salt"
         ats = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, salt: ET_SALT, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: true)
-        token = ats.generateToken(url: query_salt_path)
+        token = ats.generateURLToken(query_salt_path)
         uri = URI("http://#{ET_HOSTNAME}#{query_salt_path}?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
@@ -196,7 +191,7 @@ class TestEdgeAuth < Test::Unit::TestCase
     
     def test_acl_asta_escape_on__ignoreQuery_yes
         ats = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
-        token = ats.generateToken(acl: '/q_escape_ignore/*')
+        token = ats.generateACLToken('/q_escape_ignore/*')
         uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore/hello?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
@@ -205,7 +200,7 @@ class TestEdgeAuth < Test::Unit::TestCase
     def test_acl_deli_escape_on__ignoreQuery_yes
         ats = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS, escape_early: false)
         acl = ["/q_escape_ignore", "/q_escape_ignore/*"]
-        token = ats.generateToken(acl: acl.join(Akamai::EdgeAuth.ACL_DELIMITER))
+        token = ats.generateACLToken(acl)
         uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
@@ -213,6 +208,9 @@ class TestEdgeAuth < Test::Unit::TestCase
         uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore/world/?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
+        
+        assert_equal(nil, ats.start_time)
+        assert_equal(nil, ats.end_time)
     end
     ##########
 
@@ -220,26 +218,32 @@ class TestEdgeAuth < Test::Unit::TestCase
         att = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS)
         # start_time
         assert_raise Akamai::EdgeAuthError do
-            att.generateToken(start_time: -1)
+            att.start_time = -1
+            att.generateURLToken("/")
         end
         assert_raise Akamai::EdgeAuthError do
-            att.generateToken(start_time: 'hello')
+            att.start_time = 'hello'
+            att.generateURLToken("/")
         end
 
         # end_time
         assert_raise Akamai::EdgeAuthError do
-            att.generateToken(end_time: -1)
+            att.end_time = -1
+            att.generateURLToken("/something")
         end
         assert_raise Akamai::EdgeAuthError do
-            att.generateToken(end_time: 'hello')
+            att.end_time = 'hello'
+            att.generateACLToken("/world/1")
         end
 
         # window_seconds
         assert_raise Akamai::EdgeAuthError do
-            att.generateToken(window_seconds: -1)
+            att.window_seconds = -1
+            att.generateACLToken("/")
         end
         assert_raise Akamai::EdgeAuthError do
-            att.generateToken(window_seconds: 'hello')
+            att.window_seconds = 'hello'
+            att.generateACLToken("/")
         end
     end
 end
