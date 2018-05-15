@@ -208,7 +208,7 @@ class TestEdgeAuth < Test::Unit::TestCase
         uri = URI("http://#{ET_HOSTNAME}/q_escape_ignore/world/?#{ats.token_name}=#{token}")
         res = Net::HTTP.get_response(uri)
         assert_equal("404", res.code)
-        
+
         assert_equal(nil, ats.start_time)
         assert_equal(nil, ats.end_time)
     end
@@ -216,6 +216,12 @@ class TestEdgeAuth < Test::Unit::TestCase
 
     def test_times
         att = Akamai::EdgeAuth.new(key: ET_ENCRYPTION_KEY, window_seconds: DEFAULT_WINDOW_SECONDS)
+
+        assert_raise Akamai::EdgeAuthError do
+            att.generateURLToken(nil)
+            att.generateACLToken(nil)
+        end
+        
         # start_time
         assert_raise Akamai::EdgeAuthError do
             att.start_time = -1

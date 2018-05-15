@@ -109,7 +109,7 @@ class EdgeAuth
                 start_time: nil, end_time: nil, window_seconds: nil, 
                 field_delimiter: '~', acl_delimiter: '!', 
                 escape_early: false, verbose: false)
-	end
+    end
 end
 ```
 
