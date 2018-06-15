@@ -144,7 +144,7 @@ module Akamai
             new_token = Array.new
 
             if ip
-                new_token.push('ip=%s' % _escapeEarly(ip))
+                new_token.push('ip=%s' % _escapeEarly(@ip))
             end
             if start_time
                 new_token.push('st=%s' % start_time)
@@ -155,10 +155,10 @@ module Akamai
                 new_token.push('acl=%s' % path)
             end
             if session_id
-                new_token.push('id=%s' % _escapeEarly(session_id))
+                new_token.push('id=%s' % _escapeEarly(@session_id))
             end
             if payload
-               new_token.push('data=%s' % _escapeEarly(payload))
+               new_token.push('data=%s' % _escapeEarly(@payload))
             end
 
             hash_code = new_token.clone

@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'akamai-edgeauth'
-  s.version     = '0.2.0'
-  s.date        = '2018-05-15'
+  s.version     = '0.2.1'
+  s.date        = '2018-06-15'
   s.summary     = 'Akamai Edge Authorization Token for Ruby'
   s.description = 'Akamai-EdgeAuth is Akamai Edge Authorization Token for Ruby 2.0+'
   s.authors     = ['Astin Choi']
