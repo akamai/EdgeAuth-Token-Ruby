@@ -8,9 +8,6 @@ EdgeAuth-Token-Ruby is Akamai Edge Authorization Token in the HTTP Cookie, Query
 
 EdgeAuth-Token-Ruby supports Ruby 2.0+.  
 
-<div style="text-align:center"><img src=https://github.com/AstinCHOI/akamai-asset/blob/master/edgeauth/edgeauth.png?raw=true/></div>
-
-
 ## Installation
 
 To install Akamai Edge Authorization Token for Ruby:  
@@ -153,9 +150,6 @@ def generateACLToken(acl)
 
 ## Others
 If you use the **Segmented Media Protection** behavior in AMD(Adaptive Media Delivery) Product, **token_name** should be '**hdnts**'.
-
-<div style="text-align:center"><img src=https://github.com/AstinCHOI/akamai-asset/blob/master/edgeauth/segmented_media_protection.png?raw=true/></div>
-
 
 ## License
 
